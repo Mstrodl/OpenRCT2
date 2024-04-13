@@ -264,8 +264,15 @@ bool ServerList::WriteFavourites(const std::vector<ServerListEntry>& entries) co
 
 std::future<std::vector<ServerListEntry>> ServerList::FetchLocalServerListAsync(const INetworkEndpoint& broadcastEndpoint) const
 {
+#ifdef __EMSCRIPTEN__
+    return std::async(std::launch::async, [] {
+        std::vector<ServerListEntry> entries;
+        return entries;
+    });
+#else
     auto broadcastAddress = broadcastEndpoint.GetHostname();
     return std::async(std::launch::async, [broadcastAddress] {
+        std::vector<ServerListEntry> entries;
         constexpr auto RECV_DELAY_MS = 10;
         constexpr auto RECV_WAIT_MS = 2000;
 
@@ -279,7 +286,6 @@ std::future<std::vector<ServerListEntry>> ServerList::FetchLocalServerListAsync(
             throw std::runtime_error("Unable to broadcast server query.");
         }
 
-        std::vector<ServerListEntry> entries;
         for (int i = 0; i < (RECV_WAIT_MS / RECV_DELAY_MS); i++)
         {
             try
@@ -316,10 +322,17 @@ std::future<std::vector<ServerListEntry>> ServerList::FetchLocalServerListAsync(
         }
         return entries;
     });
+#endif
 }
 
 std::future<std::vector<ServerListEntry>> ServerList::FetchLocalServerListAsync() const
 {
+#ifdef __EMSCRIPTEN__
+    return std::async(std::launch::async, [] {
+        std::vector<ServerListEntry> entries;
+        return entries;
+    });
+#else
     return std::async(std::launch::async, [&] {
         // Get all possible LAN broadcast addresses
         auto broadcastEndpoints = GetBroadcastAddresses();
@@ -348,6 +361,7 @@ std::future<std::vector<ServerListEntry>> ServerList::FetchLocalServerListAsync(
         }
         return mergedEntries;
     });
+#endif
 }
 
 std::future<std::vector<ServerListEntry>> ServerList::FetchOnlineServerListAsync() const
@@ -381,17 +395,17 @@ std::future<std::vector<ServerListEntry>> ServerList::FetchOnlineServerListAsync
             root = Json::FromString(response.body);
             if (root.is_object())
             {
-                auto jsonStatus = root["status"];
-                if (!jsonStatus.is_number_integer())
-                {
-                    throw MasterServerException(STR_SERVER_LIST_INVALID_RESPONSE_JSON_NUMBER);
-                }
+                // auto jsonStatus = root["status"];
+                // if (!jsonStatus.is_number_integer())
+                // {
+                //     throw MasterServerException(STR_SERVER_LIST_INVALID_RESPONSE_JSON_NUMBER);
+                // }
 
-                auto status = Json::GetNumber<int32_t>(jsonStatus);
-                if (status != 200)
-                {
-                    throw MasterServerException(STR_SERVER_LIST_MASTER_SERVER_FAILED);
-                }
+                // auto status = Json::GetNumber<int32_t>(jsonStatus);
+                // if (status != 200)
+                // {
+                //     throw MasterServerException(STR_SERVER_LIST_MASTER_SERVER_FAILED);
+                // }
 
                 auto jServers = root["servers"];
                 if (!jServers.is_array())

@@ -65,6 +65,9 @@ static Widget _windowChangelogWidgets[] = {
          */
         const std::string GetText(PATHID pathId)
         {
+#ifdef __EMSCRIPTEN__
+            return "";
+#else
             auto env = GetContext()->GetPlatformEnvironment();
             auto path = env->GetFilePath(pathId);
             auto fs = std::ifstream(fs::u8path(path), std::ios::in);
@@ -79,6 +82,7 @@ static Widget _windowChangelogWidgets[] = {
             fs.read(buffer.get(), length);
             auto result = std::string(buffer.get(), buffer.get() + length);
             return result;
+#endif
         }
 
         /**

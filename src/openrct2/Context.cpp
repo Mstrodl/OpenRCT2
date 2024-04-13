@@ -1099,7 +1099,7 @@ namespace OpenRCT2
             } while (!_finished);
 #else
             emscripten_set_main_loop_arg(
-                [](void* vctx) -> {
+                [](void* vctx) {
                     auto ctx = reinterpret_cast<Context*>(vctx);
                     ctx->RunFrame();
                 },
@@ -1137,6 +1137,9 @@ namespace OpenRCT2
             {
                 RunFixedFrame(deltaTime);
             }
+#ifdef __EMSCRIPTEN__
+            emscripten_sleep(0);
+#endif // __EMSCRIPTEN__
         }
 
         void UpdateTimeAccumulators(float deltaTime)
