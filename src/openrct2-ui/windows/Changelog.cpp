@@ -68,6 +68,9 @@ public:
 #if defined(_WIN32) && !defined(__MINGW32__)
         auto pathW = String::ToWideChar(path);
         auto fs = std::ifstream(pathW, std::ios::in);
+#elif defined(__EMSCRIPTEN__)
+        std::ifstream fs;
+        return "";
 #else
         auto fs = std::ifstream(path, std::ios::in);
 #endif

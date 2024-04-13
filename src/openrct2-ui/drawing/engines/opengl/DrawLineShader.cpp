@@ -13,6 +13,12 @@
 
 #    include "OpenGLFramebuffer.h"
 
+extern "C" void glGenVertexArrays(GLsizei n, GLuint *arrays);
+extern "C" void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
+extern "C" void glVertexAttribDivisor(GLuint index, GLuint divisor);
+extern "C" void glBindVertexArray(GLuint array);
+extern "C" void glDeleteVertexArrays(GLsizei n, const GLuint *arrays);
+
 namespace
 {
     struct VDStruct

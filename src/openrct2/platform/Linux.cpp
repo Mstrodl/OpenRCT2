@@ -166,7 +166,11 @@ bool platform_get_steam_path(utf8* outPath, size_t outSize)
         }
     }
 
-    const char* homeDir = getpwuid(getuid())->pw_dir;
+    auto user = getpwuid(getuid());
+    const char* homeDir = nullptr;
+    if (user != nullptr) {
+        homeDir = user->pw_dir;
+    }
     if (homeDir != nullptr)
     {
         safe_strcpy(steamPath, homeDir, sizeof(steamPath));

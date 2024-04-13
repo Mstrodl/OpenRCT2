@@ -8,7 +8,13 @@ endif ()
 option(DISABLE_OPENGL "Disable OpenGL support.")
 
 # Third party libraries
-if (MSVC)
+if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
+    set(USE_FLAGS "-s USE_SDL=2 -s USE_BZIP2=1 -s USE_LIBPNG=1 -pthread --bind -O3")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s ASYNCIFY -s ALLOW_BLOCKING_ON_MAIN_THREAD=1 -gsource-map -s DEMANGLE_SUPPORT=1 -s ASSERTIONS=2 -s EXCEPTION_DEBUG=1 -s GL_DEBUG=1 -s SAFE_HEAP=0 -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4GB -s NO_DISABLE_EXCEPTION_CATCHING -s MAX_WEBGL_VERSION=2 -s DISABLE_DEPRECATED_FIND_EVENT_TARGET_BEHAVIOR=1 -s PTHREAD_POOL_SIZE=32 -s PTHREAD_POOL_SIZE_STRICT=2 -Wno-pthreads-mem-growth -sEXPORTED_RUNTIME_METHODS=UTF8ToString,ccall,cwrap,stringToNewUTF8,setValue -lidbfs.js --use-preload-plugins")
+    find_package(SpeexDSP REQUIRED)
+elseif (MSVC)
     find_package(SDL2 REQUIRED)
     find_library(SPEEX_LDFLAGS libspeexdsp)
 else ()
@@ -16,7 +22,7 @@ else ()
     PKG_CHECK_MODULES(SPEEX REQUIRED IMPORTED_TARGET speexdsp)
 endif ()
 
-if (NOT DISABLE_OPENGL)
+if (NOT DISABLE_OPENGL AND NOT CMAKE_SYSTEM_NAME MATCHES "Emscripten")
     # GL doesn't work nicely with macOS, while find_package doesn't work with multiarch on Ubuntu.
     if (APPLE)
         find_package(OpenGL REQUIRED)
@@ -55,7 +61,11 @@ SET_CHECK_CXX_FLAGS(${PROJECT_NAME})
 ipo_set_target_properties(${PROJECT_NAME})
 
 # mingw builds cannot use the PkgConfig imported targets
-if (NOT MSVC AND NOT WIN32)
+if (CMAKE_SYSTEM_NAME MATCHES "Emscripten")
+    target_link_libraries(${PROJECT_NAME} "libopenrct2"
+                                    ${SPEEXDSP_LIBRARIES}
+                                    ${ICU_DATA_LIBRARIES})
+elseif (NOT MSVC AND NOT WIN32)
     target_link_libraries(${PROJECT_NAME} "libopenrct2"
                                     PkgConfig::SDL2
                                     PkgConfig::SPEEX)

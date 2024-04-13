@@ -13,6 +13,7 @@
 
 #    include <openssl/evp.h>
 #    include <openssl/pem.h>
+#    include <openssl/rsa.h>
 #    include <stdexcept>
 #    include <string>
 #    include <vector>
@@ -33,7 +34,7 @@ static void OpenSSLInitialise()
     if (!_opensslInitialised)
     {
         _opensslInitialised = true;
-        OpenSSL_add_all_algorithms();
+        // OpenSSL_add_all_algorithms();
     }
 }
 

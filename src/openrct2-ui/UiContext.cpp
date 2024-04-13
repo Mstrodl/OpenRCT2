@@ -725,7 +725,11 @@ private:
             height = 480;
 
         // Create window in window first rather than fullscreen so we have the display the window is on first
+#ifdef __EMSCRIPTEN__
+        uint32_t flags = SDL_WINDOW_RESIZABLE;
+#else
         uint32_t flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+#endif
         if (gConfigGeneral.drawing_engine == DrawingEngine::OpenGL)
         {
             flags |= SDL_WINDOW_OPENGL;

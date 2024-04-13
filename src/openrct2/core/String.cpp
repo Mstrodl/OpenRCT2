@@ -843,3 +843,13 @@ char32_t CodepointView::iterator::GetNextCodepoint(const char* ch, const char** 
 {
     return utf8_get_next(ch, next);
 }
+
+#if defined(__EMSCRIPTEN__)
+// The sheer number of bad decisions that need to line up for this definition
+// to exist are mind-boggling. This game was written in assembly for fuck's
+// sake, but in 2021 the Unicode Consortium cannot be arsed to give the proper
+// vtable anchors (for the destructor here) in their own translation units.
+void icu_70::UMemory::operator delete(void *p) U_NOEXCEPT {
+    free(p);
+}
+#endif
